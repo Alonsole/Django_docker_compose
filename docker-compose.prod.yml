@@ -1,0 +1,32 @@
+services:
+  web:
+    build: ./app
+    command: gunicorn --bind 0.0.0.0:8000 stocks_products.wsgi
+    volumes:
+      - ./app/:/usr/src/app/
+      - static_volume:/usr/src/app/web/static
+    expose:
+      - 8000
+    env_file:
+      - /usr/src/.env.prod
+    depends_on:
+      - db
+  db:
+    image: postgres:17.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - /usr/src/.env.prod
+  nginx:
+    build: ./nginx
+    volumes:
+    - static_volume:/usr/src/app/web/static
+    ports:
+      - 80:80
+    depends_on:
+      - web
+
+
+volumes:
+  postgres_data:
+  static_volume:
